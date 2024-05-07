@@ -1,6 +1,7 @@
 package com.example.passwordmanager.Entities;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -36,6 +37,7 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", passCreationDate=" + passCreationDate +
+                ", Role=" + Role +
                 '}';
     }
 }
