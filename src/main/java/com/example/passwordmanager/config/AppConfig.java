@@ -1,6 +1,6 @@
 package com.example.passwordmanager.config;
 
-import com.example.passwordmanager.repository.UserRepository;
+import com.example.passwordmanager.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
