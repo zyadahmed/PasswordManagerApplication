@@ -1,7 +1,6 @@
 package com.example.passwordmanager.Entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +10,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Table(name = "users")
-public class User {
+public class User  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -25,7 +24,7 @@ public class User {
     private String password;
     @Column
     private Date passCreationDate;
-    @OneToOne(optional = false)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "roleId")
     private Role Role;
 
@@ -39,5 +38,9 @@ public class User {
                 ", passCreationDate=" + passCreationDate +
                 ", Role=" + Role +
                 '}';
+    }
+    @PrePersist
+    protected void onCreate() {
+        this.passCreationDate = new Date();
     }
 }

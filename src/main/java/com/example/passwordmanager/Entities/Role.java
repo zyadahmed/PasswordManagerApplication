@@ -17,6 +17,5 @@ public class Role {
 
     @Column(name = "role",columnDefinition = "varchar(50) default 'USER'")
     @Enumerated(EnumType.STRING)
-    private RoleNames Name;
-
+    RoleNames Name;
 }

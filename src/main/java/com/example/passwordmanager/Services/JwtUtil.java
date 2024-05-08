@@ -1,7 +1,6 @@
 package com.example.passwordmanager.Services;
 
 import com.example.passwordmanager.Entities.Role;
-import com.example.passwordmanager.Entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.annotation.PostConstruct;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
-import java.time.Instant;
 import java.util.Date;
 import java.util.function.Function;
 
