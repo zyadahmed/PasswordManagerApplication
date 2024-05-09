@@ -7,6 +7,7 @@ import com.example.passwordmanager.Dto.TokenDto;
 import com.example.passwordmanager.Entities.Role;
 import com.example.passwordmanager.Entities.RoleNames;
 import com.example.passwordmanager.Entities.User;
+import com.example.passwordmanager.Repositories.RoleRepository;
 import com.example.passwordmanager.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,19 +22,41 @@ public class AuthenticationService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+
     private final AuthenticationManager authenticationManager;
 
-    public void registerUser(RegistrationDto registrationDto){
+//    public void registerUser(RegistrationDto registrationDto){
+//        User user = new User();
+//        user.setName(registrationDto.getName());
+//        user.setEmail(registrationDto.getEmail());
+//        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
+//        Role role = new Role();
+//        role.setName(registrationDto.getRole());
+//        user.setRole(role);
+//        userRepository.save(user);
+//    }
+
+    public void registerUser(RegistrationDto registrationDto) {
+        // Validate registrationDto fields here if needed
+
         User user = new User();
         user.setName(registrationDto.getName());
         user.setEmail(registrationDto.getEmail());
         user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
-        Role role = new Role();
-        role.setName(registrationDto.getRole());
+
+        RoleNames roleName = RoleNames.valueOf(String.valueOf(registrationDto.getRole()));
+        Role role = roleRepository.findByname(RoleNames.USER);
+        if (role == null) {
+            role = new Role();
+            role.setName(roleName);
+            roleRepository.save(role);
+        }
+
         user.setRole(role);
+
         userRepository.save(user);
     }
-
     public TokenDto login (LoginDto loginDto){
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(),loginDto.getPassword()));
         User user = userRepository.findByEmail(loginDto.getEmail()).orElseThrow();
