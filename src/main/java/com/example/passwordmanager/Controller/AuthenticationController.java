@@ -4,6 +4,7 @@ import com.example.passwordmanager.Dto.LoginDto;
 import com.example.passwordmanager.Dto.RegistrationDto;
 import com.example.passwordmanager.Dto.TokenDto;
 import com.example.passwordmanager.Services.AuthenticationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class AuthenticationController {
 
     final private AuthenticationService authService;
     @PostMapping("/register")
-    public ResponseEntity<String> register (@RequestBody RegistrationDto registrationDto, BindingResult bindingResult){
+    public ResponseEntity<String> register (@RequestBody @Valid RegistrationDto registrationDto, BindingResult bindingResult){
 
         if (bindingResult.hasErrors()) {
             // Construct error message
@@ -43,6 +44,4 @@ public class AuthenticationController {
     public ResponseEntity<TokenDto> login(@RequestBody LoginDto loginDto){
             return ResponseEntity.ok(authService.login(loginDto));
     }
-
-
 }

@@ -1,8 +1,9 @@
 package com.example.passwordmanager.Services;
 
-import com.example.passwordmanager.Entities.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -23,10 +24,12 @@ public class JwtUtil {
          key = Jwts.SIG.HS256.key().build();
         return key;
     }
-    public String generateToken(UserDetails user, Role role){
-        String token = Jwts.builder().subject(user.getUsername())
+
+    public String generateToken(UserDetails user){
+        String token = Jwts.builder()
+                .subject(user.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .claim("Role",role.getName().toString())
+                .claim("Role",user.getAuthorities())
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                 .signWith(key).compact();
         return token;

@@ -4,15 +4,12 @@ package com.example.passwordmanager.Services;
 import com.example.passwordmanager.Dto.LoginDto;
 import com.example.passwordmanager.Dto.RegistrationDto;
 import com.example.passwordmanager.Dto.TokenDto;
-import com.example.passwordmanager.Entities.Role;
 import com.example.passwordmanager.Entities.RoleNames;
 import com.example.passwordmanager.Entities.User;
-import com.example.passwordmanager.Repositories.RoleRepository;
 import com.example.passwordmanager.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,31 +19,27 @@ public class AuthenticationService {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
 
     private final AuthenticationManager authenticationManager;
 
-//    public void registerUser(RegistrationDto registrationDto){
-//        User user = new User();
-//        user.setName(registrationDto.getName());
-//        user.setEmail(registrationDto.getEmail());
-//        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
-//        Role role = new Role();
-//        role.setName(registrationDto.getRole());
-//        user.setRole(role);
-//        userRepository.save(user);
-//    }
-
-    public void registerUser(RegistrationDto registrationDto) {
+    public void registerUser(RegistrationDto registrationDto){
+        User user = User.builder()
+                .name(registrationDto.getName())
+                .email(registrationDto.getEmail())
+                .password(passwordEncoder.encode(registrationDto.getPassword()))
+                .role(RoleNames.valueOf(registrationDto.getRole())).build();
+        userRepository.save(user);
+    }
+    /*
+    public ResponseEntity<String> registerUser(RegistrationDto registrationDto) {
         // Validate registrationDto fields here if needed
-
         User user = new User();
         user.setName(registrationDto.getName());
         user.setEmail(registrationDto.getEmail());
         user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
 
         RoleNames roleName = RoleNames.valueOf(String.valueOf(registrationDto.getRole()));
-        Role role = roleRepository.findByname(RoleNames.USER);
+        Role role = roleRepository.findByName(roleName);
         if (role == null) {
             role = new Role();
             role.setName(roleName);
@@ -56,12 +49,15 @@ public class AuthenticationService {
         user.setRole(role);
 
         userRepository.save(user);
+        return null;
     }
+     */
+
     public TokenDto login (LoginDto loginDto){
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(),loginDto.getPassword()));
         User user = userRepository.findByEmail(loginDto.getEmail()).orElseThrow();
-        Role role = user.getRole();
-        return TokenDto.builder().token(jwtUtil.generateToken((UserDetails) user,role)).build();
+        //Role role = user.getRole();
+        return TokenDto.builder().token(jwtUtil.generateToken(user)).build();
     }
 
 
