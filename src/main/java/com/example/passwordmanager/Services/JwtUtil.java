@@ -1,6 +1,7 @@
 package com.example.passwordmanager.Services;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -44,11 +45,13 @@ public class JwtUtil {
 
     }
     public Claims getClaims(String token){
-        Claims claims = (Claims) Jwts.parser()
+
+
+        return Jwts.parser()
                 .verifyWith(key)
                 .build()
-                .parseSignedClaims(token);
-        return claims;
+                .parseClaimsJws(token)
+                .getBody();
 
     }
     public <T> T extractClaim(String token, Function<Claims,T> cliamResolver){
