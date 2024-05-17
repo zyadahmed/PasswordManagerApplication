@@ -30,6 +30,14 @@ public class AuthenticationService {
                 .role(RoleNames.valueOf(registrationDto.getRole())).build();
         userRepository.save(user);
     }
+    public User genrateUser(RegistrationDto registrationDto){
+        User user = User.builder()
+                .name(registrationDto.getName())
+                .email(registrationDto.getEmail())
+                .password(passwordEncoder.encode(registrationDto.getPassword()))
+                .role(RoleNames.valueOf(registrationDto.getRole())).build();
+        return user;
+    }
     /*
     public ResponseEntity<String> registerUser(RegistrationDto registrationDto) {
         // Validate registrationDto fields here if needed
