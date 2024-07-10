@@ -1,0 +1,4 @@
+#Setup project details
+
+project: passwordmanager
+config: dev
