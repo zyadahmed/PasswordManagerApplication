@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
-    private final JwtUtil jwtUtil;
+    private final JwtService jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
@@ -38,6 +38,7 @@ public class AuthenticationService {
                 .role(RoleNames.valueOf(registrationDto.getRole())).build();
         return user;
     }
+
     /*
     public ResponseEntity<String> registerUser(RegistrationDto registrationDto) {
         // Validate registrationDto fields here if needed

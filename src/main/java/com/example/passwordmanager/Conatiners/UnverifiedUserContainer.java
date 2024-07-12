@@ -11,15 +11,18 @@ import java.util.concurrent.ConcurrentMap;
 
 @Service
 public class UnverifiedUserContainer {
-    private final Map<String, UnverifiedUserToken> unvertifedMap = new HashMap<>();
-    public void addUnvertifedUser(String key ,UnverifiedUserToken unverifiedUserToken){
-        unvertifedMap.put(key,unverifiedUserToken);
+    private final Map<String, Object> tokens = new HashMap<>(); // General map for tokens
+
+    public void addToken(String key, Object token) {
+        tokens.put(key, token);
     }
-    public UnverifiedUserToken removeUnvertifiedUser(String key){
-        return unvertifedMap.remove(key);
+
+    public Object removeToken(String key) {
+        return tokens.remove(key);
     }
-    public static String generateUUID(){
-        String random  = UUID.randomUUID().toString();
-        return  random;
+
+    public static String generateUUID() {
+        return UUID.randomUUID().toString();
     }
 }
+

@@ -1,10 +1,7 @@
 package com.example.passwordmanager.Services;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ClaimsBuilder;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -15,7 +12,7 @@ import java.util.Date;
 import java.util.function.Function;
 
 @Component
-public class JwtUtil {
+public class JwtService {
 
     SecretKey key;
 

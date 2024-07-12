@@ -3,6 +3,7 @@ package com.example.passwordmanager.Controller;
 import com.example.passwordmanager.Dto.UserDto;
 import com.example.passwordmanager.Entities.User;
 import com.example.passwordmanager.Repositories.UserRepository;
+import com.example.passwordmanager.Services.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @RestController
@@ -19,6 +22,7 @@ import java.util.Optional;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final ProfileService profile;
 
 
     @GetMapping("/{id}")
@@ -49,6 +53,17 @@ public class UserController {
         userRepository.save(user);
 
         return ResponseEntity.ok(new UserDto(user));
+    }
+    @PostMapping("/uploadImage")
+    public ResponseEntity<String>uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
+        try
+        {
+            String imageData = profile.uploadUserImage(file);
+            return ResponseEntity.ok(imageData);
+        }
+        catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload image: " + e.getMessage());
+        }
     }
 
 

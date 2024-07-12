@@ -49,7 +49,7 @@ public class AuthenticationController {
             UnverifiedUserToken userToken = new UnverifiedUserToken(Instant.now(),user);
             String key = UnverifiedUserContainer.generateUUID();
             mailSender.sendEmail(user.getEmail(),"Vertifcation Email","http://localhost:8080/auth/verify/"+key);
-            unverifiedUserContainer.addUnvertifedUser(key,userToken);
+            unverifiedUserContainer.addToken(key, userToken);
 
             return ResponseEntity.ok("verify the email");
         }catch (Exception e){
@@ -59,7 +59,7 @@ public class AuthenticationController {
     }
     @GetMapping("/verify/{token}")
     public ResponseEntity<String> verifyEmail(@PathVariable String token) {
-        UnverifiedUserToken unverifiedUserToken = unverifiedUserContainer.removeUnvertifiedUser(token);
+        UnverifiedUserToken unverifiedUserToken = (UnverifiedUserToken) unverifiedUserContainer.removeToken(token);
 
         if (unverifiedUserToken == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired token");
@@ -69,16 +69,59 @@ public class AuthenticationController {
         Instant now = Instant.now();
 
         if (Duration.between(tokenCreationTime, now).toMinutes() > 15) {
-            unverifiedUserContainer.removeUnvertifiedUser(token);
+            unverifiedUserContainer.removeToken(token);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token expired");
         }
 
         User user = unverifiedUserToken.getUser();
         userRepository.save(user);
-        unverifiedUserContainer.removeUnvertifiedUser(token);
+        unverifiedUserContainer.removeToken(token);
 
         return ResponseEntity.ok("Email verified successfully!");
     }
+
+
+    // reset password
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestParam String email) {
+        User user = userRepository.findByEmail(email).orElseThrow();
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        String resetToken = UnverifiedUserContainer.generateUUID();
+        UnverifiedUserToken userToken = new UnverifiedUserToken(Instant.now(), user); // Assuming UnverifiedUserToken constructor takes Instant and User
+        unverifiedUserContainer.addToken(resetToken, userToken);
+
+        mailSender.sendEmail(email, "Password Reset", "http://localhost:8080/auth/reset-password/" + resetToken);
+
+        return ResponseEntity.ok("Password reset email sent");
+    }
+
+    @PostMapping("/reset-password/{token}")
+    public ResponseEntity<String> resetPassword(@PathVariable String token, @RequestParam String newPassword) {
+        UnverifiedUserToken unverifiedUserToken = (UnverifiedUserToken) unverifiedUserContainer.removeToken(token);
+
+        if (unverifiedUserToken == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired token");
+        }
+
+        Instant tokenCreationTime = unverifiedUserToken.getDate();
+        Instant now = Instant.now();
+
+        if (Duration.between(tokenCreationTime, now).toMinutes() > 15) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token expired");
+        }
+
+        User user = unverifiedUserToken.getUser();
+        userRepository.updatePassword(user, newPassword);
+
+        return ResponseEntity.ok("Password reset successfully");
+    }
+
+
 
     @PostMapping("/login")
     public ResponseEntity<TokenDto> login(@RequestBody LoginDto loginDto){
