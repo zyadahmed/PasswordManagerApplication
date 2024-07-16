@@ -9,7 +9,7 @@ import com.example.passwordmanager.Entities.User;
 import com.example.passwordmanager.Repositories.UserRepository;
 import com.example.passwordmanager.Services.AuthenticationService;
 import com.example.passwordmanager.Services.EmailSenderService;
-import com.example.passwordmanager.Services.JwtUtil;
+import com.example.passwordmanager.Services.JwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
