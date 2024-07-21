@@ -42,6 +42,12 @@ public class User implements UserDetails {
     @JoinColumn(name = "imagedata_id", referencedColumnName = "id")
     private ImageData imageData;
 
+
+    @OneToMany(mappedBy = "user")
+    private List<Password> passwordList;
+
+
+
     @Override
     public String toString() {
         return "User{" +

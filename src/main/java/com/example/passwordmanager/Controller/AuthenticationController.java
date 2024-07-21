@@ -1,10 +1,7 @@
 package com.example.passwordmanager.Controller;
 
 import com.example.passwordmanager.Conatiners.UnverifiedUserContainer;
-import com.example.passwordmanager.Dto.LoginDto;
-import com.example.passwordmanager.Dto.RegistrationDto;
-import com.example.passwordmanager.Dto.TokenDto;
-import com.example.passwordmanager.Dto.UnverifiedUserToken;
+import com.example.passwordmanager.Dto.*;
 import com.example.passwordmanager.Entities.User;
 import com.example.passwordmanager.Repositories.UserRepository;
 import com.example.passwordmanager.Services.AuthenticationService;
@@ -21,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -37,7 +35,6 @@ public class AuthenticationController {
     public ResponseEntity<String> register (@RequestBody @Valid RegistrationDto registrationDto, BindingResult bindingResult){
 
         if (bindingResult.hasErrors()) {
-            // Construct error message
             StringBuilder errorMessage = new StringBuilder("Validation errors occurred: ");
             for (FieldError error : bindingResult.getFieldErrors()) {
                 errorMessage.append(error.getField()).append(" ").append(error.getDefaultMessage()).append("; ");
@@ -84,18 +81,20 @@ public class AuthenticationController {
     // reset password
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestParam String email) {
-        User user = userRepository.findByEmail(email).orElseThrow();
-
-        if (user == null) {
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgetPasswordDto email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email.getEmail());
+        if (optionalUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
+
+        User user = optionalUser.get();
+        System.out.println(user);
 
         String resetToken = UnverifiedUserContainer.generateUUID();
         UnverifiedUserToken userToken = new UnverifiedUserToken(Instant.now(), user); // Assuming UnverifiedUserToken constructor takes Instant and User
         unverifiedUserContainer.addToken(resetToken, userToken);
 
-        mailSender.sendEmail(email, "Password Reset", "http://localhost:8080/auth/reset-password/" + resetToken);
+        mailSender.sendEmail(email.getEmail(), "Password Reset", "http://localhost:8080/auth/reset-password/" + resetToken);
 
         return ResponseEntity.ok("Password reset email sent");
     }
