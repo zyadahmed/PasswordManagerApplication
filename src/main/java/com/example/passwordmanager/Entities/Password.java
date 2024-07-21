@@ -2,9 +2,14 @@ package com.example.passwordmanager.Entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Password {
     @Id
@@ -17,6 +22,10 @@ public abstract class Password {
 
     @Column(length = 300)
     private String description;
+
+    @ManyToOne
+    private User user;
+
 
 
 

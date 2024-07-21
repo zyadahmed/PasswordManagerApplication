@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +38,15 @@ public class User implements UserDetails {
     private Date passCreationDate;
     @Enumerated(EnumType.STRING)
     private RoleNames role;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "imagedata_id", referencedColumnName = "id")
+    private ImageData imageData;
+
+
+    @OneToMany(mappedBy = "user")
+    private List<Password> passwordList;
+
+
 
     @Override
     public String toString() {
