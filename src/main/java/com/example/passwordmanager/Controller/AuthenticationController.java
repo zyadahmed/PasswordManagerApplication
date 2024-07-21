@@ -7,8 +7,11 @@ import com.example.passwordmanager.Repositories.UserRepository;
 import com.example.passwordmanager.Services.AuthenticationService;
 import com.example.passwordmanager.Services.EmailSenderService;
 import com.example.passwordmanager.Services.JwtService;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,6 +19,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
@@ -45,7 +51,15 @@ public class AuthenticationController {
             User user = authService.genrateUser(registrationDto);
             UnverifiedUserToken userToken = new UnverifiedUserToken(Instant.now(),user);
             String key = UnverifiedUserContainer.generateUUID();
-            mailSender.sendEmail(user.getEmail(),"Vertifcation Email","http://localhost:8080/auth/verify/"+key);
+
+
+            Resource resource = new ClassPathResource("templates/VerifyMailTemplate.html");
+            Path path = resource.getFile().toPath();
+            String content = Files.readString(path);
+            content = content.replace("{verification_link}", "http://localhost:8080/auth/verify/"+key);
+
+            mailSender.sendEmailHtml(user.getEmail(), "Verify Mail",content);
+
             unverifiedUserContainer.addToken(key, userToken);
 
             return ResponseEntity.ok("verify the email");
@@ -81,7 +95,7 @@ public class AuthenticationController {
     // reset password
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody ForgetPasswordDto email) {
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgetPasswordDto email) throws IOException, MessagingException {
         Optional<User> optionalUser = userRepository.findByEmail(email.getEmail());
         if (optionalUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
@@ -94,7 +108,12 @@ public class AuthenticationController {
         UnverifiedUserToken userToken = new UnverifiedUserToken(Instant.now(), user); // Assuming UnverifiedUserToken constructor takes Instant and User
         unverifiedUserContainer.addToken(resetToken, userToken);
 
-        mailSender.sendEmail(email.getEmail(), "Password Reset", "http://localhost:8080/auth/reset-password/" + resetToken);
+        Resource resource = new ClassPathResource("templates/ForgetPasswordTemplate.html");
+        Path path = resource.getFile().toPath();
+        String content = Files.readString(path);
+        content = content.replace("{reset_link}", "http://localhost:8080/auth/reset-password/" + resetToken);
+
+        mailSender.sendEmailHtml(email.getEmail(), "Reset password",content);
 
         return ResponseEntity.ok("Password reset email sent");
     }
