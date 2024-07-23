@@ -1,6 +1,7 @@
 package com.example.passwordmanager.Controller;
 
 import com.example.passwordmanager.Dto.SocialPasswordDTO;
+import com.example.passwordmanager.Entities.Password;
 import com.example.passwordmanager.Entities.Social;
 import com.example.passwordmanager.Entities.User;
 import com.example.passwordmanager.Repositories.UserRepository;
@@ -14,7 +15,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/user/socialPasswords")
@@ -40,4 +43,19 @@ public class SocialPasswordController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error saving social password");
         }
     }
+    @GetMapping("/getAllSocial")
+    public ResponseEntity<List<Password>> getAllUserSocialPasswords(Authentication authentication){
+        String username = authentication.getName();
+        Optional<User> user = passwordService.getAllUserPassword(username);
+        if (user.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        List<Social> socials = user.get().getPasswordList()
+                .stream().filter(password -> password instanceof  Social)
+                .map(password -> (Social)password)
+                .toList();
+        return ResponseEntity.ok(user.get().getPasswordList());
+
+    }
+
 }

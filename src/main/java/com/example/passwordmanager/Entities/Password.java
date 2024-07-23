@@ -23,8 +23,6 @@ public abstract class Password {
     @Column(length = 300)
     private String description;
 
-    @ManyToOne
-    private User user;
 
 
 

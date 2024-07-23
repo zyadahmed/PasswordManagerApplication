@@ -9,6 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -43,8 +44,11 @@ public class User implements UserDetails {
     private ImageData imageData;
 
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
     private List<Password> passwordList;
+
+
 
 
 
@@ -92,5 +96,17 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+    public void addPassword(Password password) {
+        if (passwordList == null) {
+            passwordList = new ArrayList<>();
+        }
+        passwordList.add(password);
+    }
+
+    public void removePassword(Password password) {
+        if (passwordList != null) {
+            passwordList.remove(password);
+        }
     }
 }
