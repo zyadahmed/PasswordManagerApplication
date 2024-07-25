@@ -43,33 +43,56 @@ public class PasswordService {
         social.setPassword(encryptionService.encrypt(socialPasswordDTO.getPassword()));
         social.setVerticationCode(socialPasswordDTO.getVerticationCode());
 
+        social.setUser(user);
         user.addPassword(social);
 
         userRepository.save(user);
 
-        return passwordRepository.save(social);
+        return social;
     }
 
 
-    @Transactional
-    public Optional<User> getAllUserPassword(String username) {
-        Optional<User> optionalUser = userRepository.findUserWithPasswords(username);
+//    @Transactional
+//    public Optional<User> getAllUserPassword(String username) {
+//        Optional<User> optionalUser = userRepository.findUserWithPasswords(username);
+//
+//        optionalUser.ifPresent(user ->
+//                user.getPasswordList().forEach(password -> {
+//                    if (password instanceof Social) {
+//                        Social social = (Social) password;
+//                        try {
+//                            social.setPassword(encryptionService.decrypt(social.getPassword()));
+//                        } catch (Exception e) {
+//                            throw new RuntimeException("Failed to decrypt password", e);
+//                        }
+//                    }
+//                })
+//        );
+//
+//        return optionalUser;
+//    }
+@Transactional
+public Optional<User> getAllUserPassword(String username) {
+    Optional<User> optionalUser = userRepository.findUserWithPasswords(username);
 
-        optionalUser.ifPresent(user ->
-                user.getPasswordList().forEach(password -> {
-                    if (password instanceof Social) {
-                        Social social = (Social) password;
-                        try {
-                            // Decrypt the password
-                            social.setPassword(encryptionService.decrypt(social.getPassword()));
-                        } catch (Exception e) {
-                            throw new RuntimeException("Failed to decrypt password", e);
-                        }
-                    }
-                })
-        );
+    optionalUser.ifPresent(user ->
+            user.getPasswordList().forEach(password -> {
+                if (password instanceof Social) {
+                    decryptPassword((Social) password);
+                }
+            })
+    );
 
-        return optionalUser;
+    return optionalUser;
+}
+
+    private void decryptPassword(Social social) {
+        try {
+            social.setPassword(encryptionService.decrypt(social.getPassword()));
+        } catch (Exception e) {
+            System.err.println("Failed to decrypt password for social ID {}: {}" +  social.getId() +  e.getMessage());
+            throw new RuntimeException("Failed to decrypt password", e);
+        }
     }
 
 

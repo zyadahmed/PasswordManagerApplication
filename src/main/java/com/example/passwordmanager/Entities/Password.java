@@ -1,5 +1,6 @@
 package com.example.passwordmanager.Entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -22,6 +23,10 @@ public abstract class Password {
 
     @Column(length = 300)
     private String description;
+
+    @ManyToOne
+    @JsonBackReference
+    private User user;
 
 
 

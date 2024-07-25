@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -37,7 +38,7 @@ public class SocialPasswordController {
 
         try {
             Social savedSocial = passwordService.saveSocialPassword(socialPasswordDTO, username);
-            return ResponseEntity.ok("Social password saved successfully: " + savedSocial.getId());
+            return ResponseEntity.ok("Social password saved successfully: " );
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error saving social password");
@@ -57,5 +58,51 @@ public class SocialPasswordController {
         return ResponseEntity.ok(user.get().getPasswordList());
 
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<SocialPasswordDTO> getSocialPasswordById(@PathVariable int id , Authentication authentication){
+        String username = authentication.getName();
+        Optional<Social> socialOptional = passwordService.findSocialPasswordById(id);
+        if (socialOptional.isEmpty()){
+            return  ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        Social social = socialOptional.get();
+        if (!Objects.equals(social.getUser().getEmail(), username)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        SocialPasswordDTO socialPasswordDTO = new SocialPasswordDTO();
+        socialPasswordDTO.setName(social.getName());
+        socialPasswordDTO.setDescription(social.getDescription());
+        socialPasswordDTO.setPassword(social.getPassword());
+        socialPasswordDTO.setVerticationCode(social.getVerticationCode());
+
+        return ResponseEntity.ok(socialPasswordDTO);
+
+
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteSocialPasswordById(@PathVariable int id, Authentication authentication) {
+        String username = authentication.getName();
+        Optional<Social> socialOptional = passwordService.findSocialPasswordById(id);
+        if (socialOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        Social social = socialOptional.get();
+        if (!Objects.equals(social.getUser().getEmail(), username)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        passwordService.deleteSocialPasswordById(id);
+        return ResponseEntity.ok("Password deleted successfully");
+    }
+
+
+
+
+
+
+
+
+
 
 }

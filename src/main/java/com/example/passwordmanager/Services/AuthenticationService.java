@@ -27,7 +27,7 @@ public class AuthenticationService {
                 .name(registrationDto.getName())
                 .email(registrationDto.getEmail())
                 .password(passwordEncoder.encode(registrationDto.getPassword()))
-                .role(RoleNames.valueOf(registrationDto.getRole())).build();
+                .role(RoleNames.USER).build();
         userRepository.save(user);
     }
     public User genrateUser(RegistrationDto registrationDto){
@@ -35,32 +35,11 @@ public class AuthenticationService {
                 .name(registrationDto.getName())
                 .email(registrationDto.getEmail())
                 .password(passwordEncoder.encode(registrationDto.getPassword()))
-                .role(RoleNames.valueOf(registrationDto.getRole())).build();
+                .role(RoleNames.USER).build();
         return user;
     }
 
-    /*
-    public ResponseEntity<String> registerUser(RegistrationDto registrationDto) {
-        // Validate registrationDto fields here if needed
-        User user = new User();
-        user.setName(registrationDto.getName());
-        user.setEmail(registrationDto.getEmail());
-        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
 
-        RoleNames roleName = RoleNames.valueOf(String.valueOf(registrationDto.getRole()));
-        Role role = roleRepository.findByName(roleName);
-        if (role == null) {
-            role = new Role();
-            role.setName(roleName);
-            roleRepository.save(role);
-        }
-
-        user.setRole(role);
-
-        userRepository.save(user);
-        return null;
-    }
-     */
 
     public TokenDto login (LoginDto loginDto){
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(),loginDto.getPassword()));
