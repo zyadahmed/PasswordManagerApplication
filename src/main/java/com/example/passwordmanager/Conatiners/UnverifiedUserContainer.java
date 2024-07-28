@@ -1,18 +1,15 @@
 package com.example.passwordmanager.Conatiners;
 
-import com.example.passwordmanager.Dto.TokenDto;
-import com.example.passwordmanager.Dto.UnverifiedUserToken;
+import com.example.passwordmanager.dtos.UnverifiedUserToken;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 @Service

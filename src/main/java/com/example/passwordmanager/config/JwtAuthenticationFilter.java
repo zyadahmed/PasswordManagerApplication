@@ -1,6 +1,6 @@
 package com.example.passwordmanager.config;
 
-import com.example.passwordmanager.Services.JwtService;
+import com.example.passwordmanager.services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
