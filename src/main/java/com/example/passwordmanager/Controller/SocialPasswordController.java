@@ -30,69 +30,33 @@ public class SocialPasswordController {
     @Autowired
     private UserRepository userRepository;
 
+
     @PostMapping("/add")
-    public ResponseEntity<String> createSocialPassword(@RequestBody SocialPasswordDTO socialPasswordDTO){
+    public ResponseEntity<Social> createSocialPassword(@RequestBody SocialPasswordDTO socialPasswordDTO) throws Exception {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails currentUser = (UserDetails) authentication.getPrincipal();
-        String username = currentUser.getUsername();
-
-        try {
-            Social savedSocial = passwordService.saveSocialPassword(socialPasswordDTO, username);
-            return ResponseEntity.ok("Social password saved successfully: " );
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error saving social password");
-        }
+        Social social = passwordService.saveSocialPassword(socialPasswordDTO, currentUser.getUsername());
+        return ResponseEntity.ok(social);
     }
+
     @GetMapping("/getAllSocial")
-    public ResponseEntity<List<Password>> getAllUserSocialPasswords(Authentication authentication){
+    public ResponseEntity<List<SocialPasswordDTO>> getAllUserSocialPasswords(Authentication authentication) {
         String username = authentication.getName();
-        Optional<User> user = passwordService.getAllUserPassword(username);
-        if (user.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        List<Social> socials = user.get().getPasswordList()
-                .stream().filter(password -> password instanceof  Social)
-                .map(password -> (Social)password)
-                .toList();
-        return ResponseEntity.ok(user.get().getPasswordList());
-
+        List<SocialPasswordDTO> socialPasswordDTOs = passwordService.getAllUserSocialPasswords(username);
+        return ResponseEntity.ok(socialPasswordDTOs);
     }
+
     @GetMapping("/{id}")
-    public ResponseEntity<SocialPasswordDTO> getSocialPasswordById(@PathVariable int id , Authentication authentication){
+    public ResponseEntity<SocialPasswordDTO> getSocialPasswordById(@PathVariable int id, Authentication authentication) {
         String username = authentication.getName();
-        Optional<Social> socialOptional = passwordService.findSocialPasswordById(id);
-        if (socialOptional.isEmpty()){
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        Social social = socialOptional.get();
-        if (!Objects.equals(social.getUser().getEmail(), username)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        SocialPasswordDTO socialPasswordDTO = new SocialPasswordDTO();
-        socialPasswordDTO.setName(social.getName());
-        socialPasswordDTO.setDescription(social.getDescription());
-        socialPasswordDTO.setPassword(social.getPassword());
-        socialPasswordDTO.setVerticationCode(social.getVerticationCode());
-
+        SocialPasswordDTO socialPasswordDTO = passwordService.getSocialPasswordById(id, username);
         return ResponseEntity.ok(socialPasswordDTO);
-
-
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSocialPasswordById(@PathVariable int id, Authentication authentication) {
         String username = authentication.getName();
-        Optional<Social> socialOptional = passwordService.findSocialPasswordById(id);
-        if (socialOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        Social social = socialOptional.get();
-        if (!Objects.equals(social.getUser().getEmail(), username)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        passwordService.deleteSocialPasswordById(id);
+        passwordService.deleteSocialPasswordById(id, username);
         return ResponseEntity.ok("Password deleted successfully");
     }
 

@@ -4,6 +4,7 @@ import com.example.passwordmanager.Dto.UserDto;
 import com.example.passwordmanager.Entities.User;
 import com.example.passwordmanager.Repositories.UserRepository;
 import com.example.passwordmanager.Services.ProfileService;
+import com.example.passwordmanager.Services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,39 +21,23 @@ import java.util.Optional;
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
+    private final UserService userService;
 
-    private final UserRepository userRepository;
     private final ProfileService profile;
 
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable int id, Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        Optional<User> user = userRepository.findById(id);
-        if (user.isPresent() && userDetails.getUsername().equals(user.get().getUsername())) {
-            return ResponseEntity.ok(new UserDto(user.get()));
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        UserDto userDto = userService.getUserById(id, userDetails);
+        return ResponseEntity.ok(userDto);
     }
+
     @PostMapping("/{id}")
-    public ResponseEntity<UserDto> modifyUserData(@PathVariable int id, @RequestBody UserDto userDto, Authentication authentication) {
+    public ResponseEntity<UserDto> modifyUserData(@PathVariable int id, @RequestBody UserDto userDto, Authentication authentication) throws Exception {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        Optional<User> optionalUser = userRepository.findById(id);
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        User user = optionalUser.get();
-        if (!userDetails.getUsername().equals(user.getUsername())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        user.setEmail(userDto.getEmail());
-        user.setName(userDto.getName());
-        user.setPassCreationDate(userDto.getPassCreationDate());
-
-        userRepository.save(user);
-
-        return ResponseEntity.ok(new UserDto(user));
+        UserDto updatedUserDto = userService.modifyUserData(id, userDto, userDetails);
+        return ResponseEntity.ok(updatedUserDto);
     }
     @PostMapping("/uploadImage")
     public ResponseEntity<String>uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
